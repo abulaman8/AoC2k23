@@ -6,7 +6,9 @@ int main() {
                            "six", "seven", "eight", "nine"};
 
   char numbers[9][1] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-  char filename[] = "day1input1.txt";
+  char *ptrarray[9];
+  // char filename[] = "day1input1.txt";
+  char filename[] = "testinput.txt";
   FILE *fp = fopen(filename, "r");
   if (fp == NULL) {
     printf("Could not open file %s", filename);
@@ -27,12 +29,18 @@ int main() {
 
     for (int i = 0; i < 9; i++) {
       char *ptr = strstr(newstr, digitwords[i]);
-      while (ptr != NULL) {
-        *ptr = numbers[i][0];
-        ptr = strstr(ptr + 1, digitwords[i]);
+      if (ptr != NULL) {
+        ptrarray[i] = ptr;
+        printf("%s - %s\n", ptrarray[i], newstr);
+      }
+      else {
+        ptrarray[i] = NULL;
+        printf("NULL - %s\n", newstr);
       }
     }
-    printf("%s - %s\n", str, newstr);
+
+
+    // printf("%s - %s\n", str, newstr);
     strcpy(str, newstr);
     for (int i = 0; i <= len; i++) {
       if (str[i] >= '0' && str[i] <= '9') {
