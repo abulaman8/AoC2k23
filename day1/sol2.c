@@ -1,14 +1,17 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
-int main() {
-  char digitwords[9][5] = {"one", "two",   "three", "four", "five",
-                           "six", "seven", "eight", "nine"};
+int startswith(char *str, char *prefix) {
+  return strncmp(str, prefix, strlen(prefix)) == 0;
+}
 
-  char numbers[9][1] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-  char *ptrarray[9];
-  // char filename[] = "day1input1.txt";
-  char filename[] = "testinput.txt";
+int main() {
+
+  char filename[] = "day1input1.txt";
+  // char filename[] = "testinput.txt";
+  char num_words[9][6] = {"one", "two",   "three", "four", "five",
+                          "six", "seven", "eight", "nine"};
   FILE *fp = fopen(filename, "r");
   if (fp == NULL) {
     printf("Could not open file %s", filename);
@@ -21,44 +24,38 @@ int main() {
   int sum = 0;
   int value = 0;
   while (fgets(str, 512, fp) != NULL) {
+    int digits[16];
     size_t length = strcspn(str, "\n");
     str[length] = '\0';
-
     len = strlen(str);
-    strcpy(newstr, str);
+    int j = 0;
+    for (int i = 0; i < len; i++) {
+      if (isdigit(str[i])) {
+        digits[j] = str[i] - '0';
 
-    for (int i = 0; i < 9; i++) {
-      char *ptr = strstr(newstr, digitwords[i]);
-      if (ptr != NULL) {
-        ptrarray[i] = ptr;
-        printf("%s - %s\n", ptrarray[i], newstr);
+        j++;
       }
-      else {
-        ptrarray[i] = NULL;
-        printf("NULL - %s\n", newstr);
+      for (int k = 0; k < 9; k++) {
+        char copy[len];
+        strcpy(copy, str+i);
+        copy[len-i] = '\0';
+        if (startswith(copy, num_words[k])) {
+          digits[j] = k + 1;
+          j++;
+        }
       }
     }
-
-
-    // printf("%s - %s\n", str, newstr);
-    strcpy(str, newstr);
-    for (int i = 0; i <= len; i++) {
-      if (str[i] >= '0' && str[i] <= '9') {
-        twodigits[0] = str[i] - '0';
-        // printf("%d", twodigits[0]);
-        break;
-      }
+    for (int i = 0; i < j; i++) {
+      printf("%d", digits[i]);
     }
-    for (int i = len; i >= 0; i--) {
-      if (str[i] >= '0' && str[i] <= '9') {
-        twodigits[1] = (int)str[i] - '0';
-        // printf("%d\n", twodigits[1]);
-        break;
-      }
-    }
+    printf("\n");
+
+    twodigits[0] = digits[0];
+    twodigits[1] = digits[j - 1];
+    printf("%d - %d\n", twodigits[0], twodigits[1]);
+
     value = (twodigits[0] * 10) + twodigits[1];
     sum += value;
-    // printf("%d - %d\n", value, sum);
   }
   fclose(fp);
   printf("%d\n", sum);
