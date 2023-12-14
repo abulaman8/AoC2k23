@@ -52,10 +52,19 @@ int find_reflection_len_with_bit_flip(
       if (strcmp(block[i - j], block[i + j + 1]) != 0) {
         if (try_bitflip_and_match(block[i - j], block[i + j + 1],
                                   strlen(block[i - j])) == 0) {
+          num_bit_flips = 0;
           break;
-        } else {
-          num_bit_flips++;
         }
+        else {
+          if (num_bit_flips == 0) {
+            num_bit_flips++;
+          }
+          else {
+            num_bit_flips = 0;
+            break;
+          }
+        }
+
       }
       if (j == len_to_check - 1) {
         if (num_bit_flips == 1) {
