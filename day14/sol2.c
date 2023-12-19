@@ -9,6 +9,14 @@ void printGrid(char **grid, int rows) {
   }
 }
 
+void copyGrid(char **source, char **dest, int rows, int cols) {
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      dest[i][j] = source[i][j];
+    }
+  }
+}
+
 int compareGrid(char **old, char **new, int rows, int cols) {
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < cols; j++) {
@@ -96,13 +104,13 @@ char **spinMeDaddy(char **grid, int rows, int cols) {
 }
 
 int main() {
-  char filename[16] = "testinput.txt";
-  int num_rows = 10;
-  int num_cols = 10;
+  // char filename[16] = "testinput.txt";
+  // int num_rows = 10;
+  // int num_cols = 10;
   // ---------------------------------
-  // char filename[16] = "input.txt";
-  // int num_rows = 100;
-  // int num_cols = 101;
+  char filename[16] = "input.txt";
+  int num_rows = 100;
+  int num_cols = 101;
   char str[128];
   int load = 0;
   int spin_count = 0;
@@ -111,10 +119,10 @@ int main() {
   for (int i = 0; i < num_rows; i++) {
     grid[i] = malloc(num_cols * sizeof(char));
   }
-  char **old = malloc(num_rows * sizeof(char *));
-  for (int i = 0; i < num_rows; i++) {
-    old[i] = malloc(num_cols * sizeof(char));
-  }
+  char ***old = NULL;
+  // for (int i = 0; i < num_rows; i++) {
+  //   old[i] = malloc(num_cols * sizeof(char));
+  // }
   FILE *fp = fopen(filename, "r");
   if (fp == NULL) {
     printf("File open error\n");
@@ -126,30 +134,105 @@ int main() {
     strcpy(grid[i], str);
     i++;
   }
-  for (int i = 0; i < num_rows; i++) {
-    printf("%s\n", grid[i]);
-  }
+  // for (int i = 0; i < num_rows; i++) {
+  //   printf("%s\n", grid[i]);
+  // }
 
-  char **tiltedGrid = spinMeDaddy(grid, num_rows, num_cols);
-  
-  for (int i = 0; i < num_rows; i++) {
-    for (int j = 0; j < num_cols; j++) {
-      old[i][j] = tiltedGrid[i][j];
+  // grid = spinMeDaddy(grid, num_rows, num_cols);
+  // printf("One Cycle done:\n");
+  // printGrid(grid, num_rows);
+  // printf("\n");
+  //
+  // grid = spinMeDaddy(grid, num_rows, num_cols);
+  // printf("Two Cycles done:\n");
+  // printGrid(grid, num_rows);
+  // printf("\n");
+  //
+  // grid = spinMeDaddy(grid, num_rows, num_cols);
+  // printf("Three Cycles done:\n");
+  // printGrid(grid, num_rows);
+  // printf("\n");
+  //
+  // grid = spinMeDaddy(grid, num_rows, num_cols);
+  // printf("Four Cycles done:\n");
+  // printGrid(grid, num_rows);
+  // printf("\n");
+  //
+  // grid = spinMeDaddy(grid, num_rows, num_cols);
+  // printf("Five Cycles done:\n");
+  // printGrid(grid, num_rows);
+  // printf("\n");
+  //
+  // grid = spinMeDaddy(grid, num_rows, num_cols);
+  // printf("Six Cycles done:\n");
+  // printGrid(grid, num_rows);
+  // printf("\n");
+  //
+
+  // char **tiltedGrid = spinMeDaddy(grid, num_rows, num_cols);
+  // char **tiltedGrid = NULL;
+
+  // for (int i = 0; i < num_rows; i++) {
+  //   for (int j = 0; j < num_cols; j++) {
+  //     old[i][j] = tiltedGrid[i][j];
+  //   }
+  // }
+  // tiltedGrid = spinMeDaddy(grid, num_rows, num_cols);
+  int repetition_found = 0;
+  int cycle_start = 0;
+  int cycle_length = 0;
+  while (spin_count < 500 && repetition_found == 0) {
+    printf("starting spin %d\n", spin_count);
+    grid = spinMeDaddy(grid, num_rows, num_cols);
+    int i = 0;
+    for (; i < spin_count; i++) {
+
+      if (compareGrid(old[i], grid, num_rows, num_cols)) {
+        printf("repetition found\n");
+        printf("at i = %d\n", i);
+        printf("spin count: %d\n", spin_count);
+        printf("old grid[%d]:\n", i);
+        printGrid(old[i], num_rows);
+        printf("current tilted grid:\n");
+        printGrid(grid, num_rows);
+        repetition_found = 1;
+        cycle_start = i;
+        cycle_length = spin_count - i;
+        grid = old[i];
+        
+        break;
+      }
     }
-  }
-  tiltedGrid = spinMeDaddy(tiltedGrid, num_rows, num_cols);
-  while (spin_count < 500000) {
-    tiltedGrid = spinMeDaddy(tiltedGrid, num_rows, num_cols);
-    if (compareGrid(old, tiltedGrid, num_rows, num_cols)) {
-      printf("repetition found\n");
-      printf("spin count: %d\n", spin_count);
-      printGrid(tiltedGrid, num_rows);
-      exit(-1);
+    if (repetition_found) {
+      break;
     }
 
+    old = realloc(old, (spin_count + 1) * sizeof(char **));
+
+    old[spin_count] = malloc(num_rows * sizeof(char *));
+    for (int i = 0; i < num_rows; i++) {
+      old[spin_count][i] = malloc(num_cols * sizeof(char));
+    }
+    // old[spin_count] = grid;
+    copyGrid(grid, old[spin_count], num_rows, num_cols);
+    // printf("old[%d]\n", spin_count);
+    // printGrid(old[spin_count], num_rows);
+
+    printf("spin %d completed\n", spin_count);
     spin_count++;
-    printf("spin count: %d\n", spin_count);
+    printf("--------------------------------------------\n");
   }
+
+  printf("cycle starts at %d\n", cycle_start);
+  printf("cycle length: %d\n", cycle_length);
+  printf("spin count: %d\n", spin_count);
+  long long billion = 1000000000;
+  long long spins_needed = (billion - (long long)(cycle_start + 1)) % ((long long)(cycle_length));
+  printf("spins needed %lld\n", spins_needed);
+  for (long long i = 0; i < spins_needed; i++){
+    spinMeDaddy(grid, num_rows, num_cols);
+  }
+
 
   // printf("-----------------SPIN COMPLETE-----------------\n");
   //
@@ -158,23 +241,24 @@ int main() {
   // for (int i = 0; i < num_rows; i++) {
   //   printf("%s\n", old[i]);
   // }
-  // printf("\n");
-  // printf("tilted:\n");
-  // for (int i = 0; i < num_rows; i++) {
-  //   printf("%s\n", tiltedGrid[i]);
-  // }
-  // for (int i = 0; i < num_rows; i++) {
-  //   for (int j = 0; j < num_cols; j++) {
-  //     if (tiltedGrid[i][j] == 'O') {
-  //       int OmyLoad = num_rows - i;
-  //       load += OmyLoad;
-  //     }
-  //   }
-  // }
+  printf("\n");
+  printf("tilted:\n");
+  for (int i = 0; i < num_rows; i++) {
+    printf("%s\n", grid[i]);
+  }
+  for (int i = 0; i < num_rows; i++) {
+    for (int j = 0; j < num_cols; j++) {
+      if (grid[i][j] == 'O') {
+        int OmyLoad = num_rows - i;
+        load += OmyLoad;
+      }
+    }
+  }
   for (int i = 0; i < num_rows; i++) {
     free(grid[i]);
   }
   free(grid);
+
   printf("Load: %d\n", load);
 
   fclose(fp);
